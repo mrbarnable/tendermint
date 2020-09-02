@@ -121,10 +121,10 @@ func (s *lightClientStateProvider) State(height uint64) (sm.State, error) {
 	}
 
 	// We need to verify the previous block to get the validator set.
-	prevLightBlock, err := s.lc.VerifyLightBlockAtHeight(int64(height-1), time.Now())
+	/*prevLightBlock, err := s.lc.VerifyLightBlockAtHeight(int64(height-1), time.Now())
 	if err != nil {
 		return sm.State{}, err
-	}
+	}*/
 	lightBlock, err := s.lc.VerifyLightBlockAtHeight(int64(height), time.Now())
 	if err != nil {
 		return sm.State{}, err
@@ -134,15 +134,22 @@ func (s *lightClientStateProvider) State(height uint64) (sm.State, error) {
 		return sm.State{}, err
 	}
 
+	nextNextLightBlock, err := s.lc.VerifyLightBlockAtHeight(int64(height+2), time.Now())
+	if err != nil {
+		return sm.State{}, err
+	}
+
 	state.LastBlockHeight = lightBlock.Height
 	state.LastBlockTime = lightBlock.Time
 	state.LastBlockID = lightBlock.Commit.BlockID
 	state.AppHash = nextLightBlock.AppHash
 	state.LastResultsHash = nextLightBlock.LastResultsHash
-	state.LastValidators = prevLightBlock.ValidatorSet
-	state.Validators = lightBlock.ValidatorSet
-	state.NextValidators = nextLightBlock.ValidatorSet
+	state.LastValidators = lightBlock.ValidatorSet
+	state.Validators = nextLightBlock.ValidatorSet
+	state.NextValidators = nextNextLightBlock.ValidatorSet
 	state.LastHeightValidatorsChanged = int64(height)
+
+	fmt.Printf("statesync-state: %v\n", state)
 
 	// We'll also need to fetch consensus params via RPC, using light client verification.
 	primaryURL, ok := s.providers[s.lc.Primary()]
