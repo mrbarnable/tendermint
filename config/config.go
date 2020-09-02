@@ -729,6 +729,7 @@ func (cfg *StateSyncConfig) TrustHashBytes() []byte {
 // DefaultStateSyncConfig returns a default configuration for the state sync service
 func DefaultStateSyncConfig() *StateSyncConfig {
 	return &StateSyncConfig{
+		RPCServers:  []string{"192.167.10.2:26657", "192.167.10.3:26657"},
 		TrustPeriod: 168 * time.Hour,
 	}
 }
